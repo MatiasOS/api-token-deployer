@@ -1,3 +1,3 @@
 export class CreateNebulaDto {
-  [x: string]: string;
+  [message: string]: string;
 }

@@ -18,10 +18,10 @@ export class NebulaService {
   async create(message: string): Promise<NebulaResponse> {
     const { THIRDWEB_NEBULA_CHAT_SECRET_KEY, THIRDWEB_NEBULA_CHAT_ENDPOINT } =
       process.env;
-    const res = await fetch(THIRDWEB_NEBULA_CHAT_ENDPOINT || '', {
+    const res = await fetch(THIRDWEB_NEBULA_CHAT_ENDPOINT!, {
       method: 'POST',
       headers: {
-        'x-secret-key': THIRDWEB_NEBULA_CHAT_SECRET_KEY || '',
+        'x-secret-key': THIRDWEB_NEBULA_CHAT_SECRET_KEY!,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
