@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { NebulaModule } from './nebula/nebula.module';
 import { ConfigModule } from '@nestjs/config';
 import { validationSchema } from './env.validation';
+import { TokenModule } from './token/token.module';
 
 void ConfigModule.forRoot({
   envFilePath: ['.env.development.local', '.env.development'],
@@ -15,6 +16,7 @@ void ConfigModule.forRoot({
       validationSchema,
     }),
     NebulaModule,
+    TokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],
