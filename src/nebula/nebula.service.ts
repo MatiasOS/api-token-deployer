@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 export interface NebulaResponse {
   message: string;
@@ -13,15 +14,25 @@ export interface NebulaResponse {
   request_id: string;
 }
 
+interface NebulaConfig {
+  secretKey: string;
+  endpoint: string;
+}
+
 @Injectable()
 export class NebulaService {
+  constructor(private readonly configService: ConfigService) {}
+
   async create(message: string): Promise<NebulaResponse> {
-    const { THIRDWEB_NEBULA_CHAT_SECRET_KEY, THIRDWEB_NEBULA_CHAT_ENDPOINT } =
-      process.env;
-    const res = await fetch(THIRDWEB_NEBULA_CHAT_ENDPOINT!, {
+    const nebulaConfig = this.configService.get<NebulaConfig>('nebulaConfig');
+    if (!nebulaConfig || !nebulaConfig.endpoint || !nebulaConfig.secretKey) {
+      throw new Error('Nebula configuration is missing or incomplete.');
+    }
+
+    const res = await fetch(nebulaConfig.endpoint, {
       method: 'POST',
       headers: {
-        'x-secret-key': THIRDWEB_NEBULA_CHAT_SECRET_KEY!,
+        'x-secret-key': nebulaConfig.secretKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
