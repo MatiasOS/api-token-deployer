@@ -6,7 +6,7 @@ type GroupedEstimates = Record<string, EstimateItem[]>;
 
 export interface EstimateResultItem {
   blockchain: string;
-  hiringEstimate: number;
+  wiringEstimate: number;
   contractCreationEstimate: number;
 }
 
@@ -33,19 +33,23 @@ export class EstimatesService {
         const tokenValue =
           await this.coingreckoService.getTokenValue(blockchain);
 
-        const { hiringEstimate, contractCreationEstimate } = estimates.reduce(
+        const { wiringEstimate, contractCreationEstimate } = estimates.reduce(
           (sums, est) => {
             const base = tokenValue * parseFloat(est.amount);
             return {
-              hiringEstimate: sums.hiringEstimate + base * est.wiring,
+              wiringEstimate: sums.wiringEstimate + base * est.wiring,
               contractCreationEstimate:
                 sums.contractCreationEstimate + base * est.contractCreation,
             };
           },
-          { hiringEstimate: 0, contractCreationEstimate: 0 },
+          { wiringEstimate: 0, contractCreationEstimate: 0 },
         );
 
-        return { blockchain, hiringEstimate, contractCreationEstimate };
+        return {
+          blockchain,
+          wiringEstimate,
+          contractCreationEstimate,
+        };
       }),
     );
 
