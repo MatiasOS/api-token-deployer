@@ -11,4 +11,9 @@ export const validationSchema = Joi.object({
 
   COINGRECKO_API_KEY: Joi.string().required(),
   COINGRECKO_ENDPOINT: Joi.string().uri().required(),
+
+  RPC_URL_ARB_SEPOLIA: Joi.string().uri().required(),
+  RPC_URL_SEPOLIA_TESTNET: Joi.string().uri().required(),
+  DEPLOYER_MNEMONIC: Joi.string().required(),
+  DEPLOYER_ADDRESS: Joi.string().required(),
 });
