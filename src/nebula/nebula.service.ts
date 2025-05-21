@@ -24,10 +24,9 @@ export class NebulaService {
   constructor(private readonly configService: ConfigService) {}
 
   async create(message: string): Promise<NebulaResponse> {
-    const nebulaConfig = this.configService.get<NebulaConfig>('nebulaConfig');
-    if (!nebulaConfig || !nebulaConfig.endpoint || !nebulaConfig.secretKey) {
-      throw new Error('Nebula configuration is missing or incomplete.');
-    }
+    const nebulaConfig = this.configService.get<NebulaConfig>(
+      'nebulaConfig',
+    ) as NebulaConfig;
 
     const res = await fetch(nebulaConfig.endpoint, {
       method: 'POST',
@@ -42,7 +41,9 @@ export class NebulaService {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+      throw new Error(
+        `Failed to fetch nebula service: ${res.status} ${res.statusText}`,
+      );
     }
 
     const data: NebulaResponse = (await res.json()) as NebulaResponse;

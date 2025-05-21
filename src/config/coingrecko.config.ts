@@ -6,6 +6,6 @@ export interface CoinGeckoConfig {
 }
 
 export default registerAs('coingreckoConfig', () => ({
-  apiKey: process.env.COINGRECKO_API_KEY,
-  endpoint: process.env.COINGRECKO_ENDPOINT,
+  apiKey: process.env.COINGRECKO_API_KEY as string,
+  endpoint: process.env.COINGRECKO_ENDPOINT as string,
 }));

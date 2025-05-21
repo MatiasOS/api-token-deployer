@@ -18,19 +18,11 @@ export class TokenValueService {
   constructor(private readonly configService: ConfigService) {}
 
   async getTokenValue(tokenId: string): Promise<number> {
-    const coinGeckoConfig =
-      this.configService.get<CoinGeckoConfig>('coingreckoConfig');
-    if (
-      !coinGeckoConfig ||
-      !coinGeckoConfig.endpoint ||
-      !coinGeckoConfig.apiKey
-    ) {
-      throw new Error('Coingrecko configuration is missing or incomplete.');
-    }
+    const coinGeckoConfig = this.configService.get<CoinGeckoConfig>(
+      'coingreckoConfig',
+    ) as CoinGeckoConfig;
 
     const url = `${coinGeckoConfig.endpoint}/coins/${tokenId}`;
-
-    console.log('URL:', url);
 
     const res = await fetch(url, {
       method: 'GET',
@@ -41,7 +33,9 @@ export class TokenValueService {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+      throw new Error(
+        `Failed to Coingecko fetch getTokenValue: ${res.status} ${res.statusText}`,
+      );
     }
 
     const data: CoinValueResponse = (await res.json()) as CoinValueResponse;
