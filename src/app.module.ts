@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { validationSchema } from './env.validation';
 import { appConfig } from './config/app.config';
 import { TokenValueService } from './token-value/token-value.service';
+import { EstimatesModule } from './estimates/estimates.module';
 import nebulaConfig from './config/nebula.config';
 import coingreckoConfig from './config/coingrecko.config';
 
@@ -18,6 +19,7 @@ import coingreckoConfig from './config/coingrecko.config';
       validationSchema,
       envFilePath: ['.env.development.local'],
     }),
+    EstimatesModule,
   ],
   controllers: [AppController],
   providers: [AppService, TokenValueService],
