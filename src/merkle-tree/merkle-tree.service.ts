@@ -4,9 +4,18 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMerkleTreeDto } from './dto/create-merkle-tree.dto';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
+import { DeployMerkletreeDto } from './dto/deploy-merkle-tree.dto';
+import { ChainService } from 'src/chain/chain.service';
 
+const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
+  ethereum: 'sepolia',
+  mantle: 'mantleSepoliaTestnet',
+  arbitrum: 'arbitrumSepolia',
+};
 @Injectable()
 export class MerkleTreeService {
+  constructor(private readonly chainService: ChainService) {}
+
   create(
     createMerkleTreeDto: CreateMerkleTreeDto,
   ): Record<string, StandardMerkleTree<[string, string]>> {
@@ -38,5 +47,22 @@ export class MerkleTreeService {
     }
 
     return trees;
+  }
+
+  async deploy(deployMerkletreeDto: DeployMerkletreeDto): Promise<{
+    txHash: string;
+  }> {
+    const { blockchain } = deployMerkletreeDto;
+    const chain = blockchainMap[blockchain] as
+      | 'sepolia'
+      | 'mantleSepoliaTestnet'
+      | 'arbitrumSepolia';
+    const txHash = await this.chainService.deploy({
+      chain,
+      contractName: 'MerkleDistributor',
+      deployArgs: [deployMerkletreeDto.oftAddress, deployMerkletreeDto.root],
+    });
+
+    return { txHash };
   }
 }

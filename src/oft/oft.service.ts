@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOftDto } from './dto/create-oft.dto';
-import { ChainService } from './chain/chain.service';
+import { ChainService } from '../chain/chain.service';
 import { EndpointV2ProviderService } from './endpoint-v2-provider/endpoint-v2-provider.service';
+import { ConfigService } from '@nestjs/config';
 
 const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
   ethereum: 'sepolia',
@@ -14,6 +15,7 @@ export class OftService {
   constructor(
     private readonly chainService: ChainService,
     private readonly endpointV2Provider: EndpointV2ProviderService,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(
@@ -43,14 +45,21 @@ export class OftService {
         chain: specificBlockchain,
         distributions: createOftDto.distributions,
       });
+
+      const { deployerAddress } = this.configService.get('wallets') as {
+        deployerAddress: string;
+      };
       const txHash = this.chainService.deploy({
         chain,
         contractName: 'AlTokeOFT',
-        deployArgs: {
-          ...alTokeOFTArgs,
+        deployArgs: [
+          alTokeOFTArgs.name,
+          alTokeOFTArgs.symbol,
           endpointV2Address,
-          initialSupply: initialSupply,
-        },
+          deployerAddress,
+          deployerAddress,
+          initialSupply,
+        ],
       });
       txs.push({ txHash, blockchain: specificBlockchain });
     });
