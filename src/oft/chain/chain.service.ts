@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { createWalletClient, http } from 'viem';
+import { createPublicClient, createWalletClient, http } from 'viem';
 import { mnemonicToAccount } from 'viem/accounts';
 import { sepolia, mantleSepoliaTestnet, arbitrumSepolia } from 'viem/chains';
 
@@ -18,11 +18,10 @@ interface AlTokeOFTArgs {
   endpointV2Address: `0x${string}`;
   initialSupply: bigint;
   symbol: string;
-  // owner: string;
 }
 
 @Injectable()
-export class DeployerService {
+export class ChainService {
   constructor(
     private readonly contractsService: ContractsService,
     private readonly configService: ConfigService,
@@ -84,5 +83,40 @@ export class DeployerService {
     });
 
     return walletClient;
+  }
+
+  getPublicClient(
+    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
+  ) {
+    const rpcUrl = this.configService.get('rpcUrls') as {
+      mantleSepoliaTestnet: string;
+      arbitrumSepolia: string;
+      sepolia: string;
+    };
+
+    const url: string = rpcUrl[chain];
+
+    const walletClient = createPublicClient({
+      chain: chainsMap[chain],
+      transport: http(url),
+    });
+
+    return walletClient;
+  }
+
+  async getDeployAddress({
+    txHash,
+    chain,
+  }: {
+    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia';
+    txHash: `0x${string}`;
+  }): Promise<`0x${string}` | undefined> {
+    const publicClient = this.getPublicClient(chain);
+
+    const transactionReceipt = await publicClient.getTransactionReceipt({
+      hash: txHash,
+    });
+
+    return transactionReceipt.contractAddress as `0x${string}` | undefined;
   }
 }
