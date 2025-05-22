@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { OftService } from './oft.service';
 import { OftController } from './oft.controller';
 import { ContractsService } from './contracts/contracts.service';
-import { DeployerService } from './deployer/deployer.service';
+import { ChainService } from './chain/chain.service';
 import { EndpointV2ProviderService } from './endpoint-v2-provider/endpoint-v2-provider.service';
 
 @Module({
@@ -10,7 +10,7 @@ import { EndpointV2ProviderService } from './endpoint-v2-provider/endpoint-v2-pr
   providers: [
     OftService,
     ContractsService,
-    DeployerService,
+    ChainService,
     EndpointV2ProviderService,
   ],
 })

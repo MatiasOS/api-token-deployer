@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOftDto } from './dto/create-oft.dto';
-import { DeployerService } from './deployer/deployer.service';
+import { ChainService } from './chain/chain.service';
 import { EndpointV2ProviderService } from './endpoint-v2-provider/endpoint-v2-provider.service';
 
 const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
@@ -12,7 +12,7 @@ const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
 @Injectable()
 export class OftService {
   constructor(
-    private readonly deployerService: DeployerService,
+    private readonly chainService: ChainService,
     private readonly endpointV2Provider: EndpointV2ProviderService,
   ) {}
 
@@ -43,7 +43,7 @@ export class OftService {
         chain: specificBlockchain,
         distributions: createOftDto.distributions,
       });
-      const txHash = this.deployerService.deploy({
+      const txHash = this.chainService.deploy({
         chain,
         contractName: 'AlTokeOFT',
         deployArgs: {
@@ -81,7 +81,23 @@ export class OftService {
     return totalSupply;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} oft`;
+  async getByTxHash({
+    txHash,
+    blockchain,
+  }: {
+    blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+    txHash: `0x${string}`;
+  }) {
+    const chain = blockchainMap[blockchain] as
+      | 'sepolia'
+      | 'mantleSepoliaTestnet'
+      | 'arbitrumSepolia';
+    const contractAddress: `0x${string}` | undefined =
+      await this.chainService.getDeployAddress({
+        txHash,
+        chain,
+      });
+
+    return { contractAddress };
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { OftService } from './oft.service';
 import { CreateOftDto } from './dto/create-oft.dto';
 
@@ -9,5 +9,14 @@ export class OftController {
   @Post()
   create(@Body() createOftDto: CreateOftDto) {
     return this.oftService.create(createOftDto);
+  }
+
+  @Get()
+  getDeployAddress(
+    @Query('txHash') txHash: `0x${string}`,
+    @Query('blockchain')
+    blockchain: 'ethereum' | 'mantle' | 'arbitrum',
+  ) {
+    return this.oftService.getByTxHash({ txHash, blockchain });
   }
 }
