@@ -13,13 +13,6 @@ const chainsMap = {
   arbitrumSepolia: arbitrumSepolia,
 };
 
-interface AlTokeOFTArgs {
-  name: string;
-  endpointV2Address: `0x${string}`;
-  initialSupply: bigint;
-  symbol: string;
-}
-
 @Injectable()
 export class ChainService {
   constructor(
@@ -34,7 +27,7 @@ export class ChainService {
   }: {
     chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia';
     contractName: string;
-    deployArgs: AlTokeOFTArgs;
+    deployArgs: unknown[];
   }): Promise<string> {
     const { abi, bytecode } = this.contractsService.findOne(contractName);
 
@@ -44,14 +37,7 @@ export class ChainService {
     const hash = await walletClient.deployContract({
       abi,
       account,
-      args: [
-        deployArgs.name, // name
-        deployArgs.symbol, // symbol
-        deployArgs.endpointV2Address, // endpointV2Address
-        account.address, // owner
-        account.address, // distributor
-        deployArgs.initialSupply, // amount
-      ],
+      args: deployArgs,
       bytecode,
     });
     return hash;
