@@ -10,6 +10,7 @@ import { EstimatesModule } from './estimates/estimates.module';
 import nebulaConfig from './config/nebula.config';
 import coingreckoConfig from './config/coingrecko.config';
 import { OftModule } from './oft/oft.module';
+import { MerkleTreeModule } from './merkle-tree/merkle-tree.module';
 import rpcConfig from './config/rpc.config';
 import wallets from './config/wallets.config'
 @Module({
@@ -23,6 +24,7 @@ import wallets from './config/wallets.config'
     }),
     EstimatesModule,
     OftModule,
+    MerkleTreeModule,
   ],
   controllers: [AppController],
   providers: [AppService, TokenValueService],
