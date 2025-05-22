@@ -9,17 +9,20 @@ import { TokenValueService } from './token-value/token-value.service';
 import { EstimatesModule } from './estimates/estimates.module';
 import nebulaConfig from './config/nebula.config';
 import coingreckoConfig from './config/coingrecko.config';
-
+import { OftModule } from './oft/oft.module';
+import rpcConfig from './config/rpc.config';
+import wallets from './config/wallets.config'
 @Module({
   imports: [
     NebulaModule,
     ConfigModule.forRoot({
-      load: [nebulaConfig, appConfig, coingreckoConfig],
+      load: [nebulaConfig, appConfig, coingreckoConfig, rpcConfig, wallets],
       isGlobal: true,
-      validationSchema,
+      validationSchema, // comment to prvent env validation
       envFilePath: ['.env.development.local'],
     }),
     EstimatesModule,
+    OftModule,
   ],
   controllers: [AppController],
   providers: [AppService, TokenValueService],
