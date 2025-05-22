@@ -16,14 +16,21 @@ export class OftService {
     private readonly endpointV2Provider: EndpointV2ProviderService,
   ) {}
 
-  async create(createOftDto: CreateOftDto): Promise<string[]> {
+  async create(
+    createOftDto: CreateOftDto,
+  ): Promise<
+    { txHash: string; blockchain: 'ethereum' | 'mantle' | 'arbitrum' }[]
+  > {
     const { blockchain } = createOftDto;
 
     const alTokeOFTArgs = {
       name: createOftDto.name,
       symbol: createOftDto.symbol,
     };
-    const txs: Promise<string>[] = [];
+    const txs: {
+      txHash: Promise<string>;
+      blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+    }[] = [];
     blockchain.forEach((specificBlockchain) => {
       const chain = blockchainMap[specificBlockchain] as
         | 'sepolia'
@@ -45,10 +52,11 @@ export class OftService {
           initialSupply: initialSupply,
         },
       });
-      txs.push(txHash);
+      txs.push({ txHash, blockchain: specificBlockchain });
     });
-    const txsResolved = await Promise.all(txs);
-    return txsResolved;
+    const txsResolved = await Promise.all(txs.map(({ txHash }) => txHash));
+    const resolvedTxs = txs.map((tx, i) => ({ ...tx, txHash: txsResolved[i] }));
+    return resolvedTxs;
   }
 
   initialSupply({
