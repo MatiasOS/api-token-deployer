@@ -59,8 +59,8 @@ export class MerkleTreeService {
       | 'arbitrumSepolia';
     const txHash = await this.chainService.deploy({
       chain,
-      contractName: 'MerkleTreeDistributor',
-      deployArgs: [deployMerkletreeDto.root, deployMerkletreeDto.oftAddress],
+      contractName: 'MerkleDistributor',
+      deployArgs: [deployMerkletreeDto.oftAddress, deployMerkletreeDto.root],
     });
 
     return { txHash };

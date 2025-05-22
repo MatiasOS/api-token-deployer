@@ -12,7 +12,7 @@ export class MerkleTreeController {
     return this.merkleTreeService.create(createMerkleTreeDto);
   }
 
-  @Post('/merkletree')
+  @Post('/deploy')
   deploy(@Body() deployMerkletreeDto: DeployMerkletreeDto) {
     return this.merkleTreeService.deploy(deployMerkletreeDto);
   }
