@@ -39,14 +39,20 @@ export class ChainService {
 
     const walletClient = this.getWalletClient(chain);
     const account = this.getAccount();
-
-    const hash = await walletClient.deployContract({
-      abi,
-      account,
-      args: deployArgs,
-      bytecode,
-    });
-    return hash;
+    console.log('chain:', chain);
+    console.log(deployArgs);
+    try {
+      const hash = await walletClient.deployContract({
+        abi,
+        account,
+        args: deployArgs,
+        bytecode,
+      });
+      return hash;
+    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+      return e.message;
+    }
   }
 
   getAccount() {

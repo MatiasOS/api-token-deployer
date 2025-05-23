@@ -1,7 +1,7 @@
 export class CreateMerkleTreeDto {
   distribution: {
-    address: string;
+    address: `0x${string}`;
     amount: number;
-    blockchain: string;
+    blockchain: 'ethereum' | 'mantle' | 'arbitrum';
   }[];
 }
