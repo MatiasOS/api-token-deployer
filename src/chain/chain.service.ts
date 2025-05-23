@@ -6,6 +6,7 @@ import {
   createWalletClient,
   getContract,
   http,
+  nonceManager,
 } from 'viem';
 import { mnemonicToAccount } from 'viem/accounts';
 import { sepolia, mantleSepoliaTestnet, arbitrumSepolia } from 'viem/chains';
@@ -52,7 +53,9 @@ export class ChainService {
     const walletsConfig = this.configService.get('wallets') as {
       deployerMnemonic: string;
     };
-    const account = mnemonicToAccount(walletsConfig.deployerMnemonic);
+    const account = mnemonicToAccount(walletsConfig.deployerMnemonic, {
+      nonceManager,
+    });
 
     return account;
   }
