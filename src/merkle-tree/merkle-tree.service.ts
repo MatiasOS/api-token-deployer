@@ -65,4 +65,24 @@ export class MerkleTreeService {
 
     return { txHash };
   }
+
+  async getByTxHash({
+    txHash,
+    blockchain,
+  }: {
+    blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+    txHash: `0x${string}`;
+  }) {
+    const chain = blockchainMap[blockchain] as
+      | 'sepolia'
+      | 'mantleSepoliaTestnet'
+      | 'arbitrumSepolia';
+    const contractAddress: `0x${string}` | undefined =
+      await this.chainService.getDeployAddress({
+        txHash,
+        chain,
+      });
+
+    return { contractAddress };
+  }
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOftDto } from './dto/create-oft.dto';
 import { ChainService } from '../chain/chain.service';
-import { EndpointV2ProviderService } from './endpoint-v2-provider/endpoint-v2-provider.service';
 import { ConfigService } from '@nestjs/config';
+import { ContractsService } from 'src/contracts/contracts.service';
 
 const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
   ethereum: 'sepolia',
@@ -14,8 +14,8 @@ const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
 export class OftService {
   constructor(
     private readonly chainService: ChainService,
-    private readonly endpointV2Provider: EndpointV2ProviderService,
     private readonly configService: ConfigService,
+    private readonly contractService: ContractsService,
   ) {}
 
   async create(
@@ -38,8 +38,7 @@ export class OftService {
         | 'sepolia'
         | 'mantleSepoliaTestnet'
         | 'arbitrumSepolia';
-      const endpointV2Address =
-        this.endpointV2Provider.endpointV2Address(chain);
+      const endpointV2Address = this.endpointV2Address(chain);
 
       const initialSupply = this.initialSupply({
         chain: specificBlockchain,
@@ -108,5 +107,51 @@ export class OftService {
       });
 
     return { contractAddress };
+  }
+
+  async transfer({
+    oftAddress,
+    merkleTreeAddress,
+    blockchain,
+    transferAmount,
+  }: {
+    oftAddress: `0x${string}`;
+    merkleTreeAddress: `0x${string}`;
+    blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+    transferAmount: bigint;
+  }) {
+    const chain = blockchainMap[blockchain] as
+      | 'sepolia'
+      | 'mantleSepoliaTestnet'
+      | 'arbitrumSepolia';
+
+    const publicClient = this.chainService.getPublicClient(chain);
+    const { abi } = this.contractService.findOne('AlTokeOFT');
+    const account = this.chainService.getAccount();
+    const { request } = await publicClient.simulateContract({
+      address: oftAddress,
+      abi,
+      functionName: 'transfer',
+      args: [merkleTreeAddress, transferAmount],
+      account,
+    });
+
+    const walletClient = this.chainService.getWalletClient(chain);
+    const txHash = await walletClient.writeContract(request);
+
+
+    return { txHash };
+  }
+
+  endpointV2Address(
+    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
+  ): `0x${string}` {
+    const addressMap: Record<string, `0x${string}`> = {
+      mantleSepoliaTestnet: '0x6EDCE65403992e310A62460808c4b910D972f10f',
+      arbitrumSepolia: '0x6EDCE65403992e310A62460808c4b910D972f10f',
+      sepolia: '0x6EDCE65403992e310A62460808c4b910D972f10f',
+    };
+
+    return addressMap[chain];
   }
 }
