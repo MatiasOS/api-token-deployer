@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@layerzerolabs/devtools": "^0.4.10",
-    "@layerzerolabs/lz-definitions": "^3.0.94",
+    "@layerzerolabs/lz-definitions": "^3.0.96",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
