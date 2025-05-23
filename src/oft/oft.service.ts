@@ -59,7 +59,7 @@ export class OftService {
           endpointV2Address,
           deployerAddress,
           deployerAddress,
-          initialSupply,
+          '0x' + initialSupply.toString(16),
         ],
       });
       txs.push({ txHash, blockchain: specificBlockchain });

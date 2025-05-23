@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { CreateMerkleTreeDto } from './dto/create-merkle-tree.dto';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
@@ -18,7 +15,10 @@ export class MerkleTreeService {
 
   create(
     createMerkleTreeDto: CreateMerkleTreeDto,
-  ): Record<string, StandardMerkleTree<[string, string]>> {
+  ): Record<
+    'ethereum' | 'mantle' | 'arbitrum',
+    StandardMerkleTree<[string, string]>
+  > {
     const { distribution } = createMerkleTreeDto;
 
     // Group by blockchain
