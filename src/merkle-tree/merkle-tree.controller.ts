@@ -2,10 +2,15 @@ import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { MerkleTreeService } from './merkle-tree.service';
 import { CreateMerkleTreeDto } from './dto/create-merkle-tree.dto';
 import { DeployMerkletreeDto } from './dto/deploy-merkle-tree.dto';
+import { ConfigureMerkleTreeDto } from './dto/configure-merkle-tree.dto';
+import { OftService } from 'src/oft/oft.service';
 
 @Controller('merkle-tree')
 export class MerkleTreeController {
-  constructor(private readonly merkleTreeService: MerkleTreeService) {}
+  constructor(
+    private readonly merkleTreeService: MerkleTreeService,
+    private readonly oftService: OftService,
+  ) {}
 
   @Post()
   create(@Body() createMerkleTreeDto: CreateMerkleTreeDto) {
@@ -24,5 +29,15 @@ export class MerkleTreeController {
     blockchain: 'ethereum' | 'mantle' | 'arbitrum',
   ) {
     return this.merkleTreeService.getByTxHash({ txHash, blockchain });
+  }
+
+  @Post('/configure')
+  configure(@Body() configureMerkleTreeDto: ConfigureMerkleTreeDto) {
+    return this.oftService.transfer({
+      oftAddress: configureMerkleTreeDto.tokenAddress,
+      merkleTreeAddress: configureMerkleTreeDto.merkleTreeAddress,
+      blockchain: configureMerkleTreeDto.blockchain,
+      transferAmount: configureMerkleTreeDto.transferAmount,
+    });
   }
 }
