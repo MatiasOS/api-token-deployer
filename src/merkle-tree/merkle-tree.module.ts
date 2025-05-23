@@ -9,7 +9,7 @@ import { ContractsModule } from 'src/contracts/contracts.module';
 
 @Module({
   controllers: [MerkleTreeController],
-  providers: [MerkleTreeService, OftService, OftService, ContractsService],
+  providers: [MerkleTreeService, OftService, ContractsService],
   imports: [ChainModule, OftModule, ContractsModule],
   exports: [MerkleTreeService],
 })
