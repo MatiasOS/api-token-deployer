@@ -159,7 +159,10 @@ export class OftService {
   endpointId(
     chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
   ): number {
-    const endpointIdMap: Record<string, number> = {
+    const endpointIdMap: Record<
+      'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
+      number
+    > = {
       mantleSepoliaTestnet: 40246,
       arbitrumSepolia: 40231,
       sepolia: 40161,
@@ -170,7 +173,8 @@ export class OftService {
 
   async configure(args: ConfigureOftDto): Promise<
     {
-      txHash: `0x${string}`;
+      txHash?: `0x${string}`;
+      message?: any;
       originBlockchain: 'ethereum' | 'mantle' | 'arbitrum';
       destinationBlockchain: 'ethereum' | 'mantle' | 'arbitrum';
     }[]
@@ -211,9 +215,15 @@ export class OftService {
           originBlockchain: pair[0].blockchain,
           destinationBlockchain: pair[1].blockchain,
         });
-      } catch (e) {
+      } catch (e: any) {
         console.log(e);
         console.log(pair);
+        txHashes.push({
+          originBlockchain: pair[0].blockchain,
+          destinationBlockchain: pair[1].blockchain,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          message: e.message,
+        });
       }
     }
 
