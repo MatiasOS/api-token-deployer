@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { createPublicClient, createWalletClient, http } from 'viem';
+import {
+  createPublicClient,
+  createWalletClient,
+  getContract,
+  http,
+} from 'viem';
 import { mnemonicToAccount } from 'viem/accounts';
 import { sepolia, mantleSepoliaTestnet, arbitrumSepolia } from 'viem/chains';
 
@@ -43,7 +48,7 @@ export class ChainService {
     return hash;
   }
 
-  private getAccount() {
+  getAccount() {
     const walletsConfig = this.configService.get('wallets') as {
       deployerMnemonic: string;
     };
@@ -104,5 +109,30 @@ export class ChainService {
     });
 
     return transactionReceipt.contractAddress as `0x${string}` | undefined;
+  }
+
+  getContract({
+    address,
+    chain,
+    contractName,
+  }: {
+    address: `0x${string}`;
+    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia';
+    contractName: string;
+  }) {
+    const { abi } = this.contractsService.findOne(contractName);
+    const publicClient = this.getPublicClient(chain);
+    const walletClient = this.getWalletClient(chain);
+
+    const contract = getContract({
+      address,
+      abi,
+      client: {
+        public: publicClient,
+        wallet: walletClient,
+      },
+    });
+
+    return contract;
   }
 }
