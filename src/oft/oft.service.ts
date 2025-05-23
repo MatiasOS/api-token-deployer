@@ -3,6 +3,8 @@ import { CreateOftDto } from './dto/create-oft.dto';
 import { ChainService } from '../chain/chain.service';
 import { ConfigService } from '@nestjs/config';
 import { ContractsService } from 'src/contracts/contracts.service';
+import { ConfigureOftDto } from './dto/configure-oft.dto';
+import { pad } from 'viem';
 
 const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
   ethereum: 'sepolia',
@@ -139,7 +141,6 @@ export class OftService {
     const walletClient = this.chainService.getWalletClient(chain);
     const txHash = await walletClient.writeContract(request);
 
-
     return { txHash };
   }
 
@@ -153,5 +154,103 @@ export class OftService {
     };
 
     return addressMap[chain];
+  }
+
+  endpointId(
+    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
+  ): number {
+    const endpointIdMap: Record<
+      'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
+      number
+    > = {
+      mantleSepoliaTestnet: 40246,
+      arbitrumSepolia: 40231,
+      sepolia: 40161,
+    };
+
+    return endpointIdMap[chain];
+  }
+
+  async configure(args: ConfigureOftDto): Promise<
+    {
+      txHash?: `0x${string}`;
+      message?: any;
+      originBlockchain: 'ethereum' | 'mantle' | 'arbitrum';
+      destinationBlockchain: 'ethereum' | 'mantle' | 'arbitrum';
+    }[]
+  > {
+    const txHashes = [];
+    const pairs = this.generateBlockchainPairs(args);
+
+    for (let index = 0; index < pairs.length; index++) {
+      const pair = pairs[index];
+      const originChain = blockchainMap[pair[0].blockchain] as
+        | 'sepolia'
+        | 'mantleSepoliaTestnet'
+        | 'arbitrumSepolia';
+
+      const destinationChain = blockchainMap[pair[1].blockchain] as
+        | 'sepolia'
+        | 'mantleSepoliaTestnet'
+        | 'arbitrumSepolia';
+
+      const destinationEId = this.endpointId(destinationChain);
+      const destinationAddress = pair[1].address;
+      const publicClient = this.chainService.getPublicClient(originChain);
+      const { abi } = this.contractService.findOne('AlTokeOFT');
+      const account = this.chainService.getAccount();
+      const walletClient = this.chainService.getWalletClient(originChain);
+      try {
+        const { request } = await publicClient.simulateContract({
+          address: pair[0].address,
+          abi,
+          functionName: 'setPeer',
+          args: [destinationEId, pad(destinationAddress)],
+          account,
+        });
+
+        const txHash = await walletClient.writeContract(request);
+        txHashes.push({
+          txHash,
+          originBlockchain: pair[0].blockchain,
+          destinationBlockchain: pair[1].blockchain,
+        });
+      } catch (e: any) {
+        console.log(e);
+        console.log(pair);
+        txHashes.push({
+          originBlockchain: pair[0].blockchain,
+          destinationBlockchain: pair[1].blockchain,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          message: e.message,
+        });
+      }
+    }
+
+    return txHashes;
+  }
+
+  generateBlockchainPairs(args: ConfigureOftDto) {
+    const configs = args.configurations;
+    const pairs: [
+      {
+        blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+        address: `0x${string}`;
+      },
+      {
+        blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+        address: `0x${string}`;
+      },
+    ][] = [];
+
+    for (let i = 0; i < configs.length; i++) {
+      for (let j = 0; j < configs.length; j++) {
+        if (i !== j) {
+          pairs.push([configs[i], configs[j]]);
+        }
+      }
+    }
+
+    return pairs;
   }
 }
