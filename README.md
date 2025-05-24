@@ -1,98 +1,183 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# AL TOKE TOKEN API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Al Toke token API allows deploying tokens to third parties without the need for native tokenization of the blockchain. It is ideal for non-technical web3 users and end users.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Considerations to be taken into account due to time constraints of the hackathon duration:
 
-## Description
+- No type validations are performed.
+- The control and waiting of the txs is done in the frontend. Multiple parallel calls may fail
+- If a txs fails in a configuration, it is not reattempted, and in some cases the failure is reported in the response.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Key features
 
-## Project setup
+- Deployment and configuration cost estimates in USD
+- OFT (LayerZero) deployment and configuration
+- Merkle Trees build and deployments on chain for airdrop and/or distribution
+
+## Run
+
+- Install dependencies `$ npm i`
+- Run in developer mode `$ npm run start:dev`
+
+## Endpoints
+
+### IA Help
+
+Uses [Nebula by Third Web](https://thirdweb.com/nebula) to explain users what is each field.
 
 ```bash
-$ npm install
+curl --request POST \
+  --url http://localhost:3000/nebula \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/11.1.0' \
+  --data '{
+    "message": "What is Ethereum? Give me a short answer"
+}'
 ```
 
-## Compile and run the project
+### Estimates
+
+Get U$D estimates for OFT contract deployment and configurations.
+contractCreation & wiring is tx fee in native token
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+curl --request POST \
+  --url http://127.0.0.1:3000/estimates \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/11.1.0' \
+  --data '{
+ "estimates": [
+  {
+   "blockchain": "ethereum",
+   "contractCreation": 0.02405016,
+   "wiring": 0.00348915
+  },
+  {
+   "blockchain": "mantle",
+   "contractCreation": 0.19448711,
+   "wiring": 0.06457882
+  },
+  {
+   "blockchain": "mantle",
+   "contractCreation": 0.19448711,
+   "wiring": 0.06457882
+  },
+  {
+   "blockchain": "arbitrum",
+   "contractCreation": 0.02405016,
+   "wiring": 0.06457882
+  }
+ ]
+}'
 ```
 
-## Run tests
+### OFT
+
+Deploy OFT on blockchain. Support only for sepolia testnets.  
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl --request POST \
+  --url http://127.0.0.1:3000/oft \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/11.1.0' \
+  --data '{
+  "blockchain": ["ethereum","mantle","arbitrum"],
+  "protocol": "OFT",
+  "name": "TEST-M-01",
+  "symbol": "TM1",
+  "distributions": [{
+    "blockchain": "mantle",
+    "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
+    "amount": "100"
+  },
+          {
+    "blockchain": "arbitrum",
+    "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
+    "amount": "200"
+  },
+          {
+    "blockchain": "ethereum",
+    "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
+    "amount": "300"
+  }]
+}'
 ```
 
-## Deployment
+### OFT configure
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Wire OFT contracts. For more info visit [Layer Zero OFT docs](https://docs.layerzero.network/v2/developers/evm/oft/quickstart#deployment-workflow)
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+curl --request POST \
+  --url http://127.0.0.1:3000/oft/configure \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/11.1.0' \
+  --data '{
+ "configurations": [
+  {
+   "blockchain": "ethereum",
+   "address": "0x600c83dcf00216d1611dd8021d8f03770105fbe0"
+  },
+  {
+   "blockchain": "mantle",
+   "address": "0xdf823b1a96c6205e70ee59de0b794ce13cfbc595"
+  }
+ ]
+}'
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Merkle tree
 
-## Resources
+Builds a merkle Tree with the token distribution for each chain. The root is for the Merkle Distributor Smart contract.
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+curl --request POST \
+  --url http://127.0.0.1:3000/merkle-tree \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/11.1.0' \
+  --data '{
+ "distribution": [{
+    "blockchain": "mantle",
+    "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
+    "amount": "100"
+  },
+          {
+    "blockchain": "ethereum",
+    "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
+    "amount": "300"
+  }]
+}'
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Deploy Merkle tree
 
-## Support
+Deploy a Merkle tree in a blockchain.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+curl --request POST \
+  --url http://127.0.0.1:3000/merkle-tree/deploy \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/11.1.0' \
+  --data '{
+  "blockchain": "ethereum",
+ "root": "0xe5222407cc7164dafa08637b6fd387deafa794ca214651fe8ff6f7ad6dbeb43b",
+ "oftAddress": "0x600c83dcf00216d1611dd8021d8f03770105fbe0"
+}'
+```
 
-## Stay in touch
+### Configure Merkle Tree
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Transfer tokens to Merkle tree that should be claimed later.
 
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+curl --request POST \
+  --url http://127.0.0.1:3000/merkle-tree/configure \
+  --header 'Content-Type: application/json' \
+  --header 'User-Agent: insomnia/11.1.0' \
+  --data '{
+  "blockchain": "ethereum",
+ "tokenAddress": "0x600c83dcf00216d1611dd8021d8f03770105fbe0",
+  "merkleTreeAddress": "0x95f807134ae1dfdf06c758e8a957d82838353fb0" ,
+  "transferAmount": 300
+}'
+```
