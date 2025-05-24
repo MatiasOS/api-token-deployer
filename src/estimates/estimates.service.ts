@@ -35,7 +35,7 @@ export class EstimatesService {
 
         const { wiringEstimate, contractCreationEstimate } = estimates.reduce(
           (sums, est) => {
-            const base = tokenValue * parseFloat(est.amount);
+            const base = tokenValue;
             return {
               wiringEstimate: sums.wiringEstimate + base * est.wiring,
               contractCreationEstimate:
