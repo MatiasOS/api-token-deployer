@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { OftService } from './oft.service';
 import { OftController } from './oft.controller';
-import { ChainModule } from 'src/chain/chain.module';
-import { ContractsModule } from 'src/contracts/contracts.module';
 import { ConfigService } from '@nestjs/config';
-import { ContractsService } from 'src/contracts/contracts.service';
+import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
   controllers: [OftController],
-  imports: [ChainModule, ContractsModule],
-  providers: [OftService, ConfigService, ContractsService],
+  imports: [SharedModule],
+  providers: [OftService, ConfigService],
+  exports: [OftService],
 })
 export class OftModule {}
