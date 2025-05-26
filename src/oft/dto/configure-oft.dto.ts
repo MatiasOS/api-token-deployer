@@ -1,6 +1,8 @@
+import { SupportedChainId } from 'src/shared/types/chainId.types';
+
 export class ConfigureOftDto {
   configurations: {
-    blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+    chainId: SupportedChainId;
     address: `0x${string}`;
   }[];
 }

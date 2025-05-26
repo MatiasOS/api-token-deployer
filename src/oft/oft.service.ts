@@ -5,12 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { ContractsService } from 'src/shared/contracts/contracts.service';
 import { ConfigureOftDto } from './dto/configure-oft.dto';
 import { pad } from 'viem';
-
-const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
-  ethereum: 'sepolia',
-  mantle: 'mantleSepoliaTestnet',
-  arbitrum: 'arbitrumSepolia',
-};
+import { SupportedChainId } from 'src/shared/types/chainId.types';
 
 @Injectable()
 export class OftService {
@@ -22,10 +17,8 @@ export class OftService {
 
   async create(
     createOftDto: CreateOftDto,
-  ): Promise<
-    { txHash: string; blockchain: 'ethereum' | 'mantle' | 'arbitrum' }[]
-  > {
-    const { blockchain } = createOftDto;
+  ): Promise<{ txHash: string; chainId: SupportedChainId }[]> {
+    const { chainId } = createOftDto;
 
     const alTokeOFTArgs = {
       name: createOftDto.name,
@@ -33,79 +26,62 @@ export class OftService {
     };
     const txs: {
       txHash: Promise<string>;
-      blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+      chainId: SupportedChainId;
     }[] = [];
-    blockchain.forEach((specificBlockchain) => {
-      const chain = blockchainMap[specificBlockchain] as
-        | 'sepolia'
-        | 'mantleSepoliaTestnet'
-        | 'arbitrumSepolia';
-      const endpointV2Address = this.endpointV2Address(chain);
 
-      const initialSupply = this.initialSupply({
-        chain: specificBlockchain,
-        distributions: createOftDto.distributions,
-      });
+    const endpointV2Address = this.endpointV2Address(chainId);
 
-      const { deployerAddress } = this.configService.get('wallets') as {
-        deployerAddress: string;
-      };
-      const txHash = this.chainService.deploy({
-        chain,
-        contractName: 'AlTokeOFT',
-        deployArgs: [
-          alTokeOFTArgs.name,
-          alTokeOFTArgs.symbol,
-          endpointV2Address,
-          deployerAddress,
-          deployerAddress,
-          '0x' + initialSupply.toString(16),
-        ],
-      });
-      txs.push({ txHash, blockchain: specificBlockchain });
+    const initialSupply = this.initialSupply(createOftDto);
+
+    const { deployerAddress } = this.configService.get('wallets') as {
+      deployerAddress: string;
+    };
+    const txHash = this.chainService.deploy({
+      chainId,
+      contractName: 'AlTokeOFT',
+      deployArgs: [
+        alTokeOFTArgs.name,
+        alTokeOFTArgs.symbol,
+        endpointV2Address,
+        deployerAddress,
+        deployerAddress,
+        '0x' + initialSupply.toString(16),
+      ],
     });
+    txs.push({ txHash, chainId });
+
     const txsResolved = await Promise.all(txs.map(({ txHash }) => txHash));
     const resolvedTxs = txs.map((tx, i) => ({ ...tx, txHash: txsResolved[i] }));
     return resolvedTxs;
   }
 
   initialSupply({
-    chain,
     distributions,
   }: {
-    chain: string;
     distributions: {
-      blockchain: string;
-      address: string;
+      address: `0x${string}`;
       amount: string;
     }[];
   }): bigint {
-    const distributionsForChain = distributions.filter(
-      (distribution) => distribution.blockchain === chain,
+    const totalSupply: bigint = distributions.reduce(
+      (acc, distribution) => acc + BigInt(distribution.amount),
+      0n,
     );
-
-    const totalSupply = distributionsForChain.reduce((acc, distribution) => {
-      return acc + BigInt(distribution.amount);
-    }, 0n);
 
     return totalSupply;
   }
 
   async getByTxHash({
     txHash,
-    blockchain,
+    chainId,
   }: {
-    blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+    chainId: SupportedChainId;
     txHash: `0x${string}`;
   }) {
-    const chain = blockchainMap[blockchain] as
-      | 'sepolia'
-      | 'mantleSepoliaTestnet'
-      | 'arbitrumSepolia';
     const contractAddress: `0x${string}` | undefined =
       await this.chainService.getDeployAddress({
         txHash,
-        chain,
+        chainId,
       });
 
     return { contractAddress };
@@ -114,20 +90,15 @@ export class OftService {
   async transfer({
     oftAddress,
     merkleTreeAddress,
-    blockchain,
+    chainId,
     transferAmount,
   }: {
     oftAddress: `0x${string}`;
     merkleTreeAddress: `0x${string}`;
-    blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+    chainId: SupportedChainId;
     transferAmount: bigint;
   }) {
-    const chain = blockchainMap[blockchain] as
-      | 'sepolia'
-      | 'mantleSepoliaTestnet'
-      | 'arbitrumSepolia';
-
-    const publicClient = this.chainService.getPublicClient(chain);
+    const publicClient = this.chainService.getPublicClient(chainId);
     const { abi } = this.contractService.findOne('AlTokeOFT');
     const account = this.chainService.getAccount();
     const { request } = await publicClient.simulateContract({
@@ -138,45 +109,38 @@ export class OftService {
       account,
     });
 
-    const walletClient = this.chainService.getWalletClient(chain);
+    const walletClient = this.chainService.getWalletClient(chainId);
     const txHash = await walletClient.writeContract(request);
 
     return { txHash };
   }
 
-  endpointV2Address(
-    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
-  ): `0x${string}` {
-    const addressMap: Record<string, `0x${string}`> = {
-      mantleSepoliaTestnet: '0x6EDCE65403992e310A62460808c4b910D972f10f',
-      arbitrumSepolia: '0x6EDCE65403992e310A62460808c4b910D972f10f',
-      sepolia: '0x6EDCE65403992e310A62460808c4b910D972f10f',
+  endpointV2Address(chainId: SupportedChainId): `0x${string}` {
+    const addressMap: Partial<Record<SupportedChainId, `0x${string}`>> = {
+      5003: '0x6EDCE65403992e310A62460808c4b910D972f10f',
+      421614: '0x6EDCE65403992e310A62460808c4b910D972f10f',
+      11155111: '0x6EDCE65403992e310A62460808c4b910D972f10f',
     };
 
-    return addressMap[chain];
+    return addressMap[chainId] as `0x${string}`;
   }
 
-  endpointId(
-    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
-  ): number {
-    const endpointIdMap: Record<
-      'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
-      number
-    > = {
-      mantleSepoliaTestnet: 40246,
-      arbitrumSepolia: 40231,
-      sepolia: 40161,
+  endpointId(chainId: SupportedChainId): number {
+    const endpointIdMap: Record<SupportedChainId, number> = {
+      5003: 40246,
+      421614: 40231,
+      11155111: 40161,
     };
 
-    return endpointIdMap[chain];
+    return endpointIdMap[chainId];
   }
 
   async configure(args: ConfigureOftDto): Promise<
     {
       txHash?: `0x${string}`;
       message?: any;
-      originBlockchain: 'ethereum' | 'mantle' | 'arbitrum';
-      destinationBlockchain: 'ethereum' | 'mantle' | 'arbitrum';
+      originChain: SupportedChainId;
+      destinationChain: SupportedChainId;
     }[]
   > {
     const txHashes = [];
@@ -184,16 +148,8 @@ export class OftService {
 
     for (let index = 0; index < pairs.length; index++) {
       const pair = pairs[index];
-      const originChain = blockchainMap[pair[0].blockchain] as
-        | 'sepolia'
-        | 'mantleSepoliaTestnet'
-        | 'arbitrumSepolia';
-
-      const destinationChain = blockchainMap[pair[1].blockchain] as
-        | 'sepolia'
-        | 'mantleSepoliaTestnet'
-        | 'arbitrumSepolia';
-
+      const originChain = pair[0].chainId;
+      const destinationChain = pair[1].chainId;
       const destinationEId = this.endpointId(destinationChain);
       const destinationAddress = pair[1].address;
       const publicClient = this.chainService.getPublicClient(originChain);
@@ -212,15 +168,15 @@ export class OftService {
         const txHash = await walletClient.writeContract(request);
         txHashes.push({
           txHash,
-          originBlockchain: pair[0].blockchain,
-          destinationBlockchain: pair[1].blockchain,
+          originChain,
+          destinationChain,
         });
       } catch (e: any) {
         console.log(e);
         console.log(pair);
         txHashes.push({
-          originBlockchain: pair[0].blockchain,
-          destinationBlockchain: pair[1].blockchain,
+          originChain,
+          destinationChain,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           message: e.message,
         });
@@ -234,11 +190,11 @@ export class OftService {
     const configs = args.configurations;
     const pairs: [
       {
-        blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+        chainId: SupportedChainId;
         address: `0x${string}`;
       },
       {
-        blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+        chainId: SupportedChainId;
         address: `0x${string}`;
       },
     ][] = [];

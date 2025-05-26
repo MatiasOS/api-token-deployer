@@ -4,6 +4,7 @@ import { CreateMerkleTreeDto } from './dto/create-merkle-tree.dto';
 import { DeployMerkletreeDto } from './dto/deploy-merkle-tree.dto';
 import { ConfigureMerkleTreeDto } from './dto/configure-merkle-tree.dto';
 import { OftService } from 'src/oft/oft.service';
+import { SupportedChainId } from 'src/shared/types/chainId.types';
 
 @Controller('merkle-tree')
 export class MerkleTreeController {
@@ -12,7 +13,7 @@ export class MerkleTreeController {
     private readonly oftService: OftService,
   ) {}
 
-  @Post()
+  @Post('/build')
   create(@Body() createMerkleTreeDto: CreateMerkleTreeDto) {
     return this.merkleTreeService.create(createMerkleTreeDto);
   }
@@ -25,10 +26,10 @@ export class MerkleTreeController {
   @Get()
   getDeployAddress(
     @Query('txHash') txHash: `0x${string}`,
-    @Query('blockchain')
-    blockchain: 'ethereum' | 'mantle' | 'arbitrum',
+    @Query('chainId')
+    chainId: SupportedChainId,
   ) {
-    return this.merkleTreeService.getByTxHash({ txHash, blockchain });
+    return this.merkleTreeService.getByTxHash({ txHash, chainId });
   }
 
   @Post('/configure')
@@ -36,7 +37,7 @@ export class MerkleTreeController {
     return this.oftService.transfer({
       oftAddress: configureMerkleTreeDto.tokenAddress,
       merkleTreeAddress: configureMerkleTreeDto.merkleTreeAddress,
-      blockchain: configureMerkleTreeDto.blockchain,
+      chainId: configureMerkleTreeDto.chainId,
       transferAmount: configureMerkleTreeDto.transferAmount,
     });
   }
