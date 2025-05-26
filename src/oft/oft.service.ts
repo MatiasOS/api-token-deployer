@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOftDto } from './dto/create-oft.dto';
-import { ChainService } from '../chain/chain.service';
+import { ChainService } from '../shared/chain/chain.service';
 import { ConfigService } from '@nestjs/config';
-import { ContractsService } from 'src/contracts/contracts.service';
+import { ContractsService } from 'src/shared/contracts/contracts.service';
 import { ConfigureOftDto } from './dto/configure-oft.dto';
 import { pad } from 'viem';
 

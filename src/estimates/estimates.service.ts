@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEstimateDto, EstimateItem } from './dto/create-estimate.dto';
-import { TokenValueService } from 'src/token-value/token-value.service';
+import { TokenValueService } from 'src/estimates/token-value.service';
 
 type GroupedEstimates = Record<string, EstimateItem[]>;
 

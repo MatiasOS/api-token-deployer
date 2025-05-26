@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateMerkleTreeDto } from './dto/create-merkle-tree.dto';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { DeployMerkletreeDto } from './dto/deploy-merkle-tree.dto';
-import { ChainService } from 'src/chain/chain.service';
+import { ChainService } from '../shared/chain/chain.service';
 
 const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
   ethereum: 'sepolia',
