@@ -3,38 +3,41 @@ import { CreateMerkleTreeDto } from './dto/create-merkle-tree.dto';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { DeployMerkletreeDto } from './dto/deploy-merkle-tree.dto';
 import { ChainService } from '../shared/chain/chain.service';
+import { SupportedChainId } from 'src/shared/types/chainId.types';
 
-const blockchainMap: Record<'ethereum' | 'mantle' | 'arbitrum', string> = {
-  ethereum: 'sepolia',
-  mantle: 'mantleSepoliaTestnet',
-  arbitrum: 'arbitrumSepolia',
-};
 @Injectable()
 export class MerkleTreeService {
   constructor(private readonly chainService: ChainService) {}
 
   create(
     createMerkleTreeDto: CreateMerkleTreeDto,
-  ): Record<
-    'ethereum' | 'mantle' | 'arbitrum',
-    StandardMerkleTree<[string, string]>
-  > {
+  ): Partial<Record<SupportedChainId, StandardMerkleTree<[string, string]>>> {
     const { distribution } = createMerkleTreeDto;
 
-    // Group by blockchain
+    // Group by chainId
     const grouped = distribution.reduce<
-      Record<string, { address: string; amount: number }[]>
-    >((acc, { blockchain, address, amount }) => {
-      if (!acc[blockchain]) {
-        acc[blockchain] = [];
+      Partial<
+        Record<
+          SupportedChainId,
+          {
+            address: `0x${string}`;
+            amount: number;
+          }[]
+        >
+      >
+    >((acc, { chainId, address, amount }) => {
+      if (!acc[chainId]) {
+        acc[chainId] = [];
       }
-      acc[blockchain].push({ address, amount });
+      acc[chainId].push({ address, amount });
       return acc;
     }, {});
 
-    const trees: Record<string, StandardMerkleTree<[string, string]>> = {};
+    const trees: Partial<
+      Record<SupportedChainId, StandardMerkleTree<[string, string]>>
+    > = {};
 
-    for (const [blockchain, claims] of Object.entries(grouped)) {
+    for (const [chainId, claims] of Object.entries(grouped)) {
       const transformedClaims: [string, string][] = claims.map(
         ({ address, amount }) => [address, amount.toString()],
       );
@@ -43,7 +46,7 @@ export class MerkleTreeService {
         transformedClaims,
         ['address', 'uint256'],
       );
-      trees[blockchain] = tree;
+      trees[chainId as unknown as SupportedChainId] = tree;
     }
 
     return trees;
@@ -52,13 +55,9 @@ export class MerkleTreeService {
   async deploy(deployMerkletreeDto: DeployMerkletreeDto): Promise<{
     txHash: string;
   }> {
-    const { blockchain } = deployMerkletreeDto;
-    const chain = blockchainMap[blockchain] as
-      | 'sepolia'
-      | 'mantleSepoliaTestnet'
-      | 'arbitrumSepolia';
+    const { chainId } = deployMerkletreeDto;
     const txHash = await this.chainService.deploy({
-      chain,
+      chainId,
       contractName: 'MerkleDistributor',
       deployArgs: [deployMerkletreeDto.oftAddress, deployMerkletreeDto.root],
     });
@@ -68,19 +67,15 @@ export class MerkleTreeService {
 
   async getByTxHash({
     txHash,
-    blockchain,
+    chainId,
   }: {
-    blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+    chainId: SupportedChainId;
     txHash: `0x${string}`;
   }) {
-    const chain = blockchainMap[blockchain] as
-      | 'sepolia'
-      | 'mantleSepoliaTestnet'
-      | 'arbitrumSepolia';
     const contractAddress: `0x${string}` | undefined =
       await this.chainService.getDeployAddress({
         txHash,
-        chain,
+        chainId,
       });
 
     return { contractAddress };

@@ -1,11 +1,11 @@
+import { SupportedChainId } from 'src/shared/types/chainId.types';
+
 export class CreateOftDto {
-  blockchain: ('ethereum' | 'mantle' | 'arbitrum')[];
-  protocol: 'OFT';
+  chainId: SupportedChainId;
   name: string;
   symbol: string;
   distributions: {
-    blockchain: string;
-    address: string;
+    address: `0x${string}`;
     amount: string;
   }[];
 }

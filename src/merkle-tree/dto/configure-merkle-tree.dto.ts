@@ -1,6 +1,8 @@
+import { SupportedChainId } from 'src/shared/types/chainId.types';
+
 export class ConfigureMerkleTreeDto {
   tokenAddress: `0x${string}`;
   merkleTreeAddress: `0x${string}`;
-  blockchain: 'ethereum' | 'mantle' | 'arbitrum';
+  chainId: SupportedChainId;
   transferAmount: bigint;
 }

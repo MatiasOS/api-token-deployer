@@ -8,7 +8,6 @@ import nebulaConfig from './config/nebula.config';
 import coingreckoConfig from './config/coingrecko.config';
 import { OftModule } from './oft/oft.module';
 import { MerkleTreeModule } from './merkle-tree/merkle-tree.module';
-import { ContractsModule } from './shared/contracts/contracts.module';
 import { SharedModule } from './shared/shared.module';
 import rpcConfig from './config/rpc.config';
 import wallets from './config/wallets.config';

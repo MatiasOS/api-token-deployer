@@ -1,13 +1,13 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Body, Get, Query } from '@nestjs/common';
 import { EstimatesService } from './estimates.service';
-import { CreateEstimateDto } from './dto/create-estimate.dto';
+import { SupportedChainId } from 'src/shared/types/chainId.types';
 
 @Controller('estimates')
 export class EstimatesController {
   constructor(private readonly estimatesService: EstimatesService) {}
 
-  @Post()
-  create(@Body() createEstimateDto: CreateEstimateDto) {
-    return this.estimatesService.estimateByBlockchain(createEstimateDto);
+  @Get()
+  create(@Query() chainId: SupportedChainId) {
+    return this.estimatesService.estimateByBlockchain(chainId);
   }
 }

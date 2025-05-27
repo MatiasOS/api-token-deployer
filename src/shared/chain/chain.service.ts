@@ -9,38 +9,43 @@ import {
   nonceManager,
 } from 'viem';
 import { mnemonicToAccount } from 'viem/accounts';
-import { sepolia, mantleSepoliaTestnet, arbitrumSepolia } from 'viem/chains';
+import {
+  type Chain,
+  sepolia,
+  mantleSepoliaTestnet,
+  arbitrumSepolia,
+} from 'viem/chains';
 
 import { ContractsService } from '../contracts/contracts.service';
-
-const chainsMap = {
-  sepolia: sepolia,
-  mantleSepoliaTestnet: mantleSepoliaTestnet,
-  arbitrumSepolia: arbitrumSepolia,
-};
+import { SupportedChainId } from '../types/chainId.types';
+import { RpcUrls } from 'src/config/rpc.config';
 
 @Injectable()
 export class ChainService {
+  private readonly viemChainMap: Record<SupportedChainId, Chain> = {
+    11155111: sepolia,
+    5003: mantleSepoliaTestnet,
+    421614: arbitrumSepolia,
+  };
   constructor(
     private readonly contractsService: ContractsService,
     private readonly configService: ConfigService,
   ) {}
 
   async deploy({
-    chain,
+    chainId,
     contractName,
     deployArgs,
   }: {
-    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia';
+    chainId: SupportedChainId;
     contractName: string;
     deployArgs: unknown[];
   }): Promise<string> {
     const { abi, bytecode } = this.contractsService.findOne(contractName);
 
-    const walletClient = this.getWalletClient(chain);
+    const walletClient = this.getWalletClient(chainId);
     const account = this.getAccount();
-    console.log('chain:', chain);
-    console.log(deployArgs);
+
     try {
       const hash = await walletClient.deployContract({
         abi,
@@ -66,38 +71,26 @@ export class ChainService {
     return account;
   }
 
-  getWalletClient(
-    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
-  ) {
-    const rpcUrl = this.configService.get('rpcUrls') as {
-      mantleSepoliaTestnet: string;
-      arbitrumSepolia: string;
-      sepolia: string;
-    };
+  getWalletClient(chainId: SupportedChainId) {
+    const rpcUrl = this.configService.get('rpcUrls') as RpcUrls;
 
-    const url: string = rpcUrl[chain];
+    const url: string = rpcUrl[chainId];
 
     const walletClient = createWalletClient({
-      chain: chainsMap[chain],
+      chain: this.viemChainMap[chainId],
       transport: http(url),
     });
 
     return walletClient;
   }
 
-  getPublicClient(
-    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia',
-  ) {
-    const rpcUrl = this.configService.get('rpcUrls') as {
-      mantleSepoliaTestnet: string;
-      arbitrumSepolia: string;
-      sepolia: string;
-    };
+  getPublicClient(chainId: SupportedChainId) {
+    const rpcUrl = this.configService.get('rpcUrls') as RpcUrls;
 
-    const url: string = rpcUrl[chain];
+    const url: string = rpcUrl[chainId];
 
     const walletClient = createPublicClient({
-      chain: chainsMap[chain],
+      chain: this.viemChainMap[chainId],
       transport: http(url),
     });
 
@@ -106,12 +99,12 @@ export class ChainService {
 
   async getDeployAddress({
     txHash,
-    chain,
+    chainId,
   }: {
-    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia';
+    chainId: SupportedChainId;
     txHash: `0x${string}`;
   }): Promise<`0x${string}` | undefined> {
-    const publicClient = this.getPublicClient(chain);
+    const publicClient = this.getPublicClient(chainId);
 
     const transactionReceipt = await publicClient.getTransactionReceipt({
       hash: txHash,
@@ -122,16 +115,16 @@ export class ChainService {
 
   getContract({
     address,
-    chain,
+    chainId,
     contractName,
   }: {
     address: `0x${string}`;
-    chain: 'mantleSepoliaTestnet' | 'arbitrumSepolia' | 'sepolia';
+    chainId: SupportedChainId;
     contractName: string;
   }) {
     const { abi } = this.contractsService.findOne(contractName);
-    const publicClient = this.getPublicClient(chain);
-    const walletClient = this.getWalletClient(chain);
+    const publicClient = this.getPublicClient(chainId);
+    const walletClient = this.getWalletClient(chainId);
 
     const contract = getContract({
       address,
