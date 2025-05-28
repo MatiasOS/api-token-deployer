@@ -9,12 +9,12 @@ export const validationSchema = Joi.object({
   THIRDWEB_NEBULA_CHAT_SECRET_KEY: Joi.string().required(),
   THIRDWEB_NEBULA_CHAT_ENDPOINT: Joi.string().uri().required(),
 
-  COINGRECKO_API_KEY: Joi.string().required(),
-  COINGRECKO_ENDPOINT: Joi.string().uri().required(),
+  ALCHEMY_API_KEY: Joi.string().required(),
 
   RPC_URL_ARB_SEPOLIA: Joi.string().uri().required(),
   RPC_URL_SEPOLIA_TESTNET: Joi.string().uri().required(),
   RPC_URL_MANTLE_SEPOLIA: Joi.string().uri().required(),
+
   DEPLOYER_MNEMONIC: Joi.string().required(),
   DEPLOYER_ADDRESS: Joi.string().required(),
 });
