@@ -5,7 +5,7 @@ import { validationSchema } from './env.validation';
 import { appConfig } from './config/app.config';
 import { EstimatesModule } from './estimates/estimates.module';
 import nebulaConfig from './config/nebula.config';
-import coingreckoConfig from './config/coingrecko.config';
+import alchemyConfig from './config/alchemy.config';
 import { OftModule } from './oft/oft.module';
 import { MerkleTreeModule } from './merkle-tree/merkle-tree.module';
 import { SharedModule } from './shared/shared.module';
@@ -15,7 +15,7 @@ import wallets from './config/wallets.config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [nebulaConfig, appConfig, coingreckoConfig, rpcConfig, wallets],
+      load: [nebulaConfig, appConfig, alchemyConfig, rpcConfig, wallets],
       isGlobal: true,
       validationSchema, // comment to prevent env validation
       envFilePath: ['.env.development.local'],

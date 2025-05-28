@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CoinGeckoConfig } from 'src/config/coingrecko.config';
+import { Alchemy } from 'alchemy-sdk';
+import { AlchemyConfig } from 'src/config/alchemy.config';
 
 export interface CoinValueResponse {
   id: string;
@@ -15,30 +16,17 @@ export interface CoinValueResponse {
 
 @Injectable()
 export class TokenValueService {
-  constructor(private readonly configService: ConfigService) {}
+  private readonly alchemy: Alchemy;
 
-  async getTokenValue(tokenId: string): Promise<number> {
-    const coinGeckoConfig = this.configService.get<CoinGeckoConfig>(
-      'coingreckoConfig',
-    ) as CoinGeckoConfig;
+  constructor(private readonly configService: ConfigService) {
+    const { apiKey } = this.configService.get<AlchemyConfig>(
+      'alchemyConfig',
+    ) as AlchemyConfig;
+    this.alchemy = new Alchemy({ apiKey });
+  }
 
-    const url = `${coinGeckoConfig.endpoint}/coins/${tokenId}`;
-
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'x-cg-demo-api-key': coinGeckoConfig.apiKey,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error(
-        `Failed to Coingecko fetch getTokenValue: ${res.status} ${res.statusText}`,
-      );
-    }
-
-    const data: CoinValueResponse = (await res.json()) as CoinValueResponse;
-    return data.market_data.current_price.usd;
+  async getTokenValue({ symbols }: { symbols: string[] }) {
+    const { data } = await this.alchemy.prices.getTokenPriceBySymbol(symbols);
+    return data;
   }
 }

@@ -9,12 +9,9 @@ export interface EstimateResultItem {
 
 @Injectable()
 export class EstimatesService {
-  constructor(private readonly coingreckoService: TokenValueService) {}
+  constructor(private readonly tokenValueService: TokenValueService) {}
 
-  estimateByBlockchain(chainId: SupportedChainId): EstimateResultItem {
-    return {
-      chainId,
-      base: 100,
-    };
+  async bySymbols({ symbols }: { symbols: string[] }) {
+    return this.tokenValueService.getTokenValue({ symbols });
   }
 }
