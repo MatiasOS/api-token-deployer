@@ -30,7 +30,7 @@ Docker and Docker compose installed on you machine
 ### Setup and Run
 
 1. Build and start containers
-`docker-compose up -d`
+`docker compose up -d`
 2. Access to pgAdmin: http://localhost:5050
     - Login with the email and password defined on the `.env` file
     - Connect to the PostgreSQL server using the host, port, username and password defined on the `.env` file
