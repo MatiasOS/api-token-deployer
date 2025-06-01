@@ -17,7 +17,7 @@ export class Oft {
   @Column()
   symbol: string;
 
-  @OneToMany(() => Oft_Peer, (peer) => peer.deployHash)
+  @OneToMany(() => Oft_Peer, (peer) => peer.oft)
   peers: Oft_Peer[];
 }
 
@@ -27,7 +27,7 @@ export class Oft_Peer {
   id: number;
 
   @Column()
-  deployHash: string;
+  deployTxHash: string;
 
   @Column()
   address: string;
@@ -39,7 +39,7 @@ export class Oft_Peer {
   distributor: string;
 
   @Column()
-  deployHashDistributor: string;
+  distributorDeployTxHash: string;
 
   @Column({ type: 'jsonb', nullable: true })
   tree: string;

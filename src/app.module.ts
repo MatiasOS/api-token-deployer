@@ -29,14 +29,10 @@ import { Oft, Oft_Peer } from './oft/oft.entity';
     SharedModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      url: process.env.DB_CONNECTION_STRING,
       autoLoadEntities: false,
       entities: [Oft, Oft_Peer],
-      synchronize: true,
+      synchronize: false,
     }),
   ],
 })

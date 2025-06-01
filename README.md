@@ -25,7 +25,7 @@ You can run the entire application including PostgreSQL and pgAdmin using Docker
 
 ### Prerequisites
 
-Docker and Docker compose installed on you machine
+Docker and Docker compose installed on your machine
 
 ### Setup and Run
 
