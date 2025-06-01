@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToOne,
+} from 'typeorm';
 
 @Entity()
 export class Oft {
@@ -37,4 +43,7 @@ export class Oft_Peer {
 
   @Column({ type: 'jsonb', nullable: true })
   tree: string;
+
+  @ManyToOne(() => Oft, (oft) => oft.peers)
+  oft: Oft;
 }
