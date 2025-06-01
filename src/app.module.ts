@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
-import { NebulaModule } from './nebula/nebula.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { validationSchema } from './env.validation';
 import { appConfig } from './config/app.config';
-import { EstimatesModule } from './estimates/estimates.module';
 import nebulaConfig from './config/nebula.config';
 import alchemyConfig from './config/alchemy.config';
-import { OftModule } from './oft/oft.module';
-import { MerkleTreeModule } from './merkle-tree/merkle-tree.module';
-import { SharedModule } from './shared/shared.module';
 import rpcConfig from './config/rpc.config';
 import wallets from './config/wallets.config';
+import { OftModule } from './oft/oft.module';
+import { NebulaModule } from './nebula/nebula.module';
+import { EstimatesModule } from './estimates/estimates.module';
+import { MerkleTreeModule } from './merkle-tree/merkle-tree.module';
+import { SharedModule } from './shared/shared.module';
+import { Oft, Oft_Peer } from './oft/oft.entity';
 
 @Module({
   imports: [
@@ -25,6 +27,16 @@ import wallets from './config/wallets.config';
     OftModule,
     MerkleTreeModule,
     SharedModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: 'al-toke-token',
+      entities: [Oft, Oft_Peer],
+      synchronize: true,
+    }),
   ],
 })
 export class AppModule {}
