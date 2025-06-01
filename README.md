@@ -19,6 +19,23 @@ Considerations to be taken into account due to time constraints of the hackathon
 - Install dependencies `$ npm i`
 - Run in developer mode `$ npm run start:dev`
 
+## Docker Setup
+
+You can run the entire application including PostgreSQL and pgAdmin using Docker Compose:
+
+### Prerequisites
+
+Docker and Docker compose installed on you machine
+
+### Setup and Run
+
+1. Build and start containers
+`docker-compose up -d`
+2. Access to pgAdmin: http://localhost:5050
+    - Login with the email and password defined on the `.env` file
+    - Connect to the PostgreSQL server using the host, port, username and password defined on the `.env` file
+
+
 ## Endpoints
 
 ### IA Help
