@@ -94,30 +94,7 @@ curl --request POST \
   --url http://127.0.0.1:3000/estimates \
   --header 'Content-Type: application/json' \
   --header 'User-Agent: insomnia/11.1.0' \
-  --data '{
- "estimates": [
-  {
-   "blockchain": "ethereum",
-   "contractCreation": 0.02405016,
-   "wiring": 0.00348915
-  },
-  {
-   "blockchain": "mantle",
-   "contractCreation": 0.19448711,
-   "wiring": 0.06457882
-  },
-  {
-   "blockchain": "mantle",
-   "contractCreation": 0.19448711,
-   "wiring": 0.06457882
-  },
-  {
-   "blockchain": "arbitrum",
-   "contractCreation": 0.02405016,
-   "wiring": 0.06457882
-  }
- ]
-}'
+  --data '{}'
 ```
 
 ### OFT
@@ -129,27 +106,27 @@ curl --request POST \
   --url http://127.0.0.1:3000/oft \
   --header 'Content-Type: application/json' \
   --header 'User-Agent: insomnia/11.1.0' \
-  --data '{
-  "blockchain": ["ethereum","mantle","arbitrum"],
-  "protocol": "OFT",
+  --data '```
+{
   "name": "TEST-M-01",
   "symbol": "TM1",
-  "distributions": [{
-    "blockchain": "mantle",
+  “chains”: [1,5003, 11122111],
+  “distributions”: {
+  "1": [{
     "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
     "amount": "100"
   },
-          {
-    "blockchain": "arbitrum",
+  {
     "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
     "amount": "200"
   },
-          {
-    "blockchain": "ethereum",
+  {
     "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
     "amount": "300"
   }]
-}'
+ }
+}
+```'
 ```
 
 ### OFT configure
@@ -161,18 +138,7 @@ curl --request POST \
   --url http://127.0.0.1:3000/oft/configure \
   --header 'Content-Type: application/json' \
   --header 'User-Agent: insomnia/11.1.0' \
-  --data '{
- "configurations": [
-  {
-   "blockchain": "ethereum",
-   "address": "0x600c83dcf00216d1611dd8021d8f03770105fbe0"
-  },
-  {
-   "blockchain": "mantle",
-   "address": "0xdf823b1a96c6205e70ee59de0b794ce13cfbc595"
-  }
- ]
-}'
+  --data '{}'
 ```
 
 ### Merkle tree
@@ -184,18 +150,7 @@ curl --request POST \
   --url http://127.0.0.1:3000/merkle-tree \
   --header 'Content-Type: application/json' \
   --header 'User-Agent: insomnia/11.1.0' \
-  --data '{
- "distribution": [{
-    "blockchain": "mantle",
-    "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
-    "amount": "100"
-  },
-          {
-    "blockchain": "ethereum",
-    "address": "0x3bc8dE4CF6c075Fb8e24A954EC1D1B12bDcbF336",
-    "amount": "300"
-  }]
-}'
+  --data '{}'
 ```
 
 ### Deploy Merkle tree
@@ -207,11 +162,7 @@ curl --request POST \
   --url http://127.0.0.1:3000/merkle-tree/deploy \
   --header 'Content-Type: application/json' \
   --header 'User-Agent: insomnia/11.1.0' \
-  --data '{
-  "blockchain": "ethereum",
- "root": "0xe5222407cc7164dafa08637b6fd387deafa794ca214651fe8ff6f7ad6dbeb43b",
- "oftAddress": "0x600c83dcf00216d1611dd8021d8f03770105fbe0"
-}'
+  --data '{}'
 ```
 
 ### Configure Merkle Tree
@@ -223,12 +174,7 @@ curl --request POST \
   --url http://127.0.0.1:3000/merkle-tree/configure \
   --header 'Content-Type: application/json' \
   --header 'User-Agent: insomnia/11.1.0' \
-  --data '{
-  "blockchain": "ethereum",
- "tokenAddress": "0x600c83dcf00216d1611dd8021d8f03770105fbe0",
-  "merkleTreeAddress": "0x95f807134ae1dfdf06c758e8a957d82838353fb0" ,
-  "transferAmount": 300
-}'
+  --data '{}'
 ```
 
 ## Flows
@@ -313,4 +259,27 @@ sequenceDiagram
     OFTConfigProcessor ->> DB: Store TxId
   end
   deactivate OFTConfigProcessor
+```
+
+## Queues
+
+### Deploy Queue
+
+name: deployQueue
+
+```json
+{
+  "OFTId": 123
+}
+```
+
+### Config Queue
+
+name: configQueue
+
+```json
+{
+  "OFTId": 123
+}
+
 ```
