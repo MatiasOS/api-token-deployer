@@ -12,7 +12,7 @@ import { NebulaModule } from './nebula/nebula.module';
 import { EstimatesModule } from './estimates/estimates.module';
 import { MerkleTreeModule } from './merkle-tree/merkle-tree.module';
 import { SharedModule } from './shared/shared.module';
-import { Oft, Oft_Peer } from './oft/oft.entity';
+import { dataSourceOptions } from 'db/config';
 
 @Module({
   imports: [
@@ -27,13 +27,7 @@ import { Oft, Oft_Peer } from './oft/oft.entity';
     OftModule,
     MerkleTreeModule,
     SharedModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DB_CONNECTION_STRING,
-      autoLoadEntities: false,
-      entities: [Oft, Oft_Peer],
-      synchronize: false,
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
   ],
 })
 export class AppModule {}

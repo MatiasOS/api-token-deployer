@@ -23,6 +23,38 @@ Considerations to be taken into account due to time constraints of the hackathon
 
 You can run the entire application including PostgreSQL and pgAdmin using Docker Compose:
 
+## Database Migrations
+
+The API uses database migrations to manage the database schema evolution over time. This ensures consistent database states across different environments.
+
+### Run Migrations
+
+To apply all pending migrations to the database:
+
+```bash
+npm run migration:run
+```
+
+This command will execute all migrations that haven't been applied yet, bringing your database schema up to date.
+
+### Create a new Migration
+
+To create a new migration file:
+
+```bash
+npm run migration:create --name=migration-name
+```
+
+Replace de <b>migration-name</b> with a descriptive name for your migration. This will generate a new timestamped migration file in the migrations directory that you can edit to define the changes to the database schema.
+
+Example:
+
+```bash
+npm run migration:create --name=create-user-table
+```
+
+The generated migration file will contain up() and down() methods that you can implement to apply and revert your database changes.
+
 ### Prerequisites
 
 Docker and Docker compose installed on your machine
