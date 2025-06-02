@@ -230,3 +230,87 @@ curl --request POST \
   "transferAmount": 300
 }'
 ```
+
+## Flows
+
+### API entry
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant API
+  participant DB
+  participant DeployQueue as Deploy Queue
+
+  User ->> API: Data
+  activate API
+  API ->> DB: Data
+  activate DB
+  DB ->> API: tokenID
+  deactivate DB
+  loop For each chain
+    API ->> DeployQueue: { ChainId, tokenId }
+  end
+  deactivate API
+```
+
+### OFT Deploy queue
+
+```mermaid
+sequenceDiagram
+  participant DeployQueue as Deploy Queue
+  participant DeployProcessor as Deploy Processor
+  participant DB as DB
+  participant Chain as Blockchain
+
+  DeployQueue ->> DeployProcessor: OFT.id
+  activate DeployProcessor
+  DeployProcessor ->> DB: Get token by OFT.id
+  activate DB
+  DB -->> DeployProcessor: OFT.data
+  deactivate DB
+  DeployProcessor ->> Chain: Deploy OFT
+  Chain -->> DeployProcessor: Deploy TxHash
+  DeployProcessor ->> DB: Store deploy TxHash
+  deactivate DeployProcessor
+```
+
+### Deploy indexing
+
+```mermaid
+sequenceDiagram
+  participant Chain as Blockchain
+  participant Indexer
+  participant DB
+  participant ConfigQueue
+  
+  Chain ->> Indexer: deploy tx hash
+  activate Indexer
+  Indexer ->> DB: Update OFT deploy address
+  opt Si se completaron todos los deploys (query en db)
+      Indexer->>ConfigQueue: Start OFT config
+  end
+  deactivate Indexer
+```
+
+### OFT Configure queue
+
+```mermaid
+sequenceDiagram
+  participant ConfigQueue as Config Queue
+  participant OFTConfigProcessor as Config Processor
+  participant DB
+  participant Chain as Blockchain
+
+  ConfigQueue ->> OFTConfigProcessor: OFT.id
+  activate OFTConfigProcessor
+  OFTConfigProcessor ->> DB: Get all OFT peers
+  DB -->> OFTConfigProcessor: OFT peers
+  
+  loop Para cada chainId, configurar con el resto
+    OFTConfigProcessor ->> Chain: "Config eid tx"
+    Chain -->> OFTConfigProcessor: Config tx
+    OFTConfigProcessor ->> DB: Store TxId
+  end
+  deactivate OFTConfigProcessor
+```
