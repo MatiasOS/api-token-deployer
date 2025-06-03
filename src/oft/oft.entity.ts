@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Oft {
+export class Ofts {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -17,12 +17,12 @@ export class Oft {
   @Column()
   symbol: string;
 
-  @OneToMany(() => Oft_Peer, (peer) => peer.oft)
-  peers: Oft_Peer[];
+  @OneToMany(() => Oft_Peers, (peer) => peer.oft)
+  peers: Oft_Peers[];
 }
 
 @Entity()
-export class Oft_Peer {
+export class Oft_Peers {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -44,6 +44,6 @@ export class Oft_Peer {
   @Column({ type: 'jsonb', nullable: true })
   tree: string;
 
-  @ManyToOne(() => Oft, (oft) => oft.peers)
-  oft: Oft;
+  @ManyToOne(() => Ofts, (oft) => oft.peers)
+  oft: Ofts;
 }

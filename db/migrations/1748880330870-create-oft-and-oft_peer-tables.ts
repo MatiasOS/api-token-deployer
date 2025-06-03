@@ -9,7 +9,7 @@ export class CreateOftOftPeerTables1748880330870 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'oft',
+        name: 'Ofts',
         columns: [
           {
             name: 'id',
@@ -31,7 +31,7 @@ export class CreateOftOftPeerTables1748880330870 implements MigrationInterface {
 
     await queryRunner.createTable(
       new Table({
-        name: 'oft_peer',
+        name: 'Oft_Peers',
         columns: [
           {
             name: 'id',
