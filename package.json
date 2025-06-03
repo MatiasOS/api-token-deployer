@@ -18,7 +18,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "migration:create": "npx typeorm migration:create ./db/migrations/$npm_config_name",
+    "migration:run": "npx typeorm migration:run -d dist/db/config.js"
   },
   "dependencies": {
     "@layerzerolabs/devtools": "^0.4.10",
@@ -32,6 +34,7 @@
     "@openzeppelin/merkle-tree": "^1.0.8",
     "alchemy-sdk": "^3.5.10",
     "joi": "^17.13.3",
+    "pg": "^8.16.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.24",

@@ -17,4 +17,9 @@ export const validationSchema = Joi.object({
 
   DEPLOYER_MNEMONIC: Joi.string().required(),
   DEPLOYER_ADDRESS: Joi.string().required(),
+
+  DB_CONNECTION_STRING: Joi.string().required(),
+
+  PG_ADMIN_EMAIL: Joi.string().email().required(),
+  PG_ADMIN_PASSWORD: Joi.string().min(8).required(),
 });
