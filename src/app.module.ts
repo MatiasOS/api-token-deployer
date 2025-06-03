@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule } from '@nestjs/config';
 import { validationSchema } from './env.validation';
 import { appConfig } from './config/app.config';
@@ -21,6 +22,13 @@ import { dataSourceOptions } from 'db/config';
       isGlobal: true,
       validationSchema, // comment to prevent env validation
       envFilePath: ['.env.development.local'],
+    }),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.QUEUE_HOST || 'redis',
+        port:
+          (process.env.QUEUE_PORT && parseInt(process.env.QUEUE_PORT)) || 6379,
+      },
     }),
     NebulaModule,
     EstimatesModule,

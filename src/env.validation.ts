@@ -22,4 +22,6 @@ export const validationSchema = Joi.object({
 
   PG_ADMIN_EMAIL: Joi.string().email().required(),
   PG_ADMIN_PASSWORD: Joi.string().min(8).required(),
+  QUEUE_HOST: Joi.string(),
+  QUEUE_PORT: Joi.number(),
 });

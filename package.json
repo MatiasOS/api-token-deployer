@@ -25,6 +25,7 @@
   "dependencies": {
     "@layerzerolabs/devtools": "^0.4.10",
     "@layerzerolabs/lz-definitions": "^3.0.96",
+    "@nestjs/bullmq": "^11.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
@@ -33,6 +34,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "@openzeppelin/merkle-tree": "^1.0.8",
     "alchemy-sdk": "^3.5.10",
+    "bullmq": "^5.53.1",
     "joi": "^17.13.3",
     "pg": "^8.16.0",
     "reflect-metadata": "^0.2.2",
