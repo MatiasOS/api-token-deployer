@@ -25,7 +25,7 @@ services:
       - db
 
   redis:
-    image: redis:latest
+    image: redis:7.0-alpine
     container_name: redis-att
     ports:
-    - 6380:6380  
+    - 6380:6379  
