@@ -5,7 +5,9 @@ export class CreateOftDto {
   name: string;
   symbol: string;
   distributions: {
-    address: `0x${string}`;
-    amount: string;
-  }[];
+    [chainId: string]: {
+      address: `0x${string}`;
+      amount: string;
+    }[];
+  };
 }
