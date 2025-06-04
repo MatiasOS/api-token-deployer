@@ -28,4 +28,4 @@ services:
     image: redis:7.0-alpine
     container_name: redis-att
     ports:
-    - 6380:6379  
+    - 6379:6379  
