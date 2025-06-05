@@ -6,6 +6,10 @@ import { ContractsService } from 'src/shared/contracts/contracts.service';
 import { ConfigureOftDto } from './dto/configure-oft.dto';
 import { pad } from 'viem';
 import { SupportedChainId } from 'src/shared/types/chainId.types';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Oft_Peers, Ofts } from './oft.entity';
+import { DataSource, Repository } from 'typeorm';
+import { MerkleTreeService } from 'src/merkle-tree/merkle-tree.service';
 
 @Injectable()
 export class OftService {
@@ -13,46 +17,55 @@ export class OftService {
     private readonly chainService: ChainService,
     private readonly configService: ConfigService,
     private readonly contractService: ContractsService,
+    @InjectRepository(Ofts)
+    private readonly oftsRepository: Repository<Ofts>,
+    @InjectRepository(Oft_Peers)
+    private readonly peersRepository: Repository<Oft_Peers>,
+    private readonly merkleTreeService: MerkleTreeService,
+    private readonly dataSource: DataSource,
   ) {}
 
-  async create(
-    createOftDto: CreateOftDto,
-  ): Promise<{ txHash: string; chainId: SupportedChainId }[]> {
-    const { chainId } = createOftDto;
+  async create(createOftDto: CreateOftDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const alTokeOFTArgs = {
-      name: createOftDto.name,
-      symbol: createOftDto.symbol,
-    };
-    const txs: {
-      txHash: Promise<string>;
-      chainId: SupportedChainId;
-    }[] = [];
+    try {
+      const oft = this.oftsRepository.create({
+        name: createOftDto.name,
+        symbol: createOftDto.symbol,
+      });
+      const savedOft = await queryRunner.manager.save(oft);
+      const peersToSave: Oft_Peers[] = [];
 
-    const endpointV2Address = this.endpointV2Address(chainId);
+      for (const [chainId, distribution] of Object.entries(
+        createOftDto.distributions,
+      )) {
+        const tree = this.merkleTreeService.create({
+          distribution,
+        });
 
-    const initialSupply = this.initialSupply(createOftDto);
+        const peer = this.peersRepository.create({
+          chainId,
+          tree,
+          oft: savedOft,
+          deployTxHash: null,
+          address: null,
+          distributor: null,
+          distributorDeployTxHash: null,
+        } as unknown as Oft_Peers);
+        peersToSave.push(peer);
+      }
 
-    const { deployerAddress } = this.configService.get('wallets') as {
-      deployerAddress: string;
-    };
-    const txHash = this.chainService.deploy({
-      chainId,
-      contractName: 'AlTokeOFT',
-      deployArgs: [
-        alTokeOFTArgs.name,
-        alTokeOFTArgs.symbol,
-        endpointV2Address,
-        deployerAddress,
-        deployerAddress,
-        '0x' + initialSupply.toString(16),
-      ],
-    });
-    txs.push({ txHash, chainId });
+      await queryRunner.manager.save(peersToSave);
 
-    const txsResolved = await Promise.all(txs.map(({ txHash }) => txHash));
-    const resolvedTxs = txs.map((tx, i) => ({ ...tx, txHash: txsResolved[i] }));
-    return resolvedTxs;
+      await queryRunner.commitTransaction();
+
+      return savedOft;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    }
   }
 
   initialSupply({

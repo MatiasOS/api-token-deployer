@@ -1,3 +1,4 @@
+import { SupportedChainId } from 'src/shared/types/chainId.types';
 import {
   Entity,
   Column,
@@ -26,19 +27,19 @@ export class Oft_Peers {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   deployTxHash: string;
 
-  @Column()
+  @Column({ nullable: true })
   address: string;
 
   @Column()
-  chainId: string;
+  chainId: SupportedChainId;
 
-  @Column()
+  @Column({ nullable: true })
   distributor: string;
 
-  @Column()
+  @Column({ nullable: true })
   distributorDeployTxHash: string;
 
   @Column({ type: 'jsonb', nullable: true })

@@ -4,8 +4,11 @@ export class CreateOftDto {
   chainId: SupportedChainId;
   name: string;
   symbol: string;
-  distributions: {
-    address: `0x${string}`;
-    amount: string;
-  }[];
+  distributions: Record<
+    SupportedChainId,
+    {
+      address: `0x${string}`;
+      amount: string;
+    }[]
+  >;
 }
