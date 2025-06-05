@@ -1,9 +1,8 @@
-import { SupportedChainId } from 'src/shared/types/chainId.types';
+export interface DistributionItem {
+  address: `0x${string}`;
+  amount: string;
+}
 
 export class CreateMerkleTreeDto {
-  distribution: {
-    address: `0x${string}`;
-    amount: number;
-    chainId: SupportedChainId;
-  }[];
+  distribution: DistributionItem[];
 }

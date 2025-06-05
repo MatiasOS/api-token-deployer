@@ -1,3 +1,4 @@
+import { SupportedChainId } from 'src/shared/types/chainId.types';
 import {
   Entity,
   Column,
@@ -33,7 +34,7 @@ export class Oft_Peers {
   address: string;
 
   @Column()
-  chainId: string;
+  chainId: SupportedChainId;
 
   @Column({ nullable: true })
   distributor: string;

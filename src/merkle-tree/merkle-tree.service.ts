@@ -11,45 +11,20 @@ export class MerkleTreeService {
 
   create(
     createMerkleTreeDto: CreateMerkleTreeDto,
-  ): Partial<Record<SupportedChainId, StandardMerkleTree<[string, string]>>> {
+  ): Partial<StandardMerkleTree<[string, string]>> {
     const { distribution } = createMerkleTreeDto;
 
-    // Group by chainId
-    const grouped = distribution.reduce<
-      Partial<
-        Record<
-          SupportedChainId,
-          {
-            address: `0x${string}`;
-            amount: number;
-          }[]
-        >
-      >
-    >((acc, { chainId, address, amount }) => {
-      if (!acc[chainId]) {
-        acc[chainId] = [];
-      }
-      acc[chainId].push({ address, amount });
-      return acc;
-    }, {});
+    const transformedClaims: [string, string][] = distribution.map((claim) => [
+      claim.address,
+      claim.amount,
+    ]);
 
-    const trees: Partial<
-      Record<SupportedChainId, StandardMerkleTree<[string, string]>>
-    > = {};
+    const tree: StandardMerkleTree<[string, string]> = StandardMerkleTree.of(
+      transformedClaims,
+      ['address', 'uint256'],
+    );
 
-    for (const [chainId, claims] of Object.entries(grouped)) {
-      const transformedClaims: [string, string][] = claims.map(
-        ({ address, amount }) => [address, amount.toString()],
-      );
-
-      const tree: StandardMerkleTree<[string, string]> = StandardMerkleTree.of(
-        transformedClaims,
-        ['address', 'uint256'],
-      );
-      trees[chainId as unknown as SupportedChainId] = tree;
-    }
-
-    return trees;
+    return tree;
   }
 
   async deploy(deployMerkletreeDto: DeployMerkletreeDto): Promise<{

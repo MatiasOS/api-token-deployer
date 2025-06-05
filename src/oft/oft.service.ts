@@ -8,7 +8,7 @@ import { pad } from 'viem';
 import { SupportedChainId } from 'src/shared/types/chainId.types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Oft_Peers, Ofts } from './oft.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { MerkleTreeService } from 'src/merkle-tree/merkle-tree.service';
 
 @Injectable()
@@ -22,56 +22,50 @@ export class OftService {
     @InjectRepository(Oft_Peers)
     private readonly peersRepository: Repository<Oft_Peers>,
     private readonly merkleTreeService: MerkleTreeService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(createOftDto: CreateOftDto) {
-    const oft = this.oftsRepository.create({
-      name: createOftDto.name,
-      symbol: createOftDto.symbol,
-    });
-    const savedOft = await this.oftsRepository.save(oft);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const allDistributions: {
-      chainId: SupportedChainId;
-      address: `0x${string}`;
-      amount: number;
-    }[] = [];
-
-    for (const [chainId, distributions] of Object.entries(
-      createOftDto.distributions,
-    )) {
-      distributions.forEach((d) => {
-        allDistributions.push({
-          chainId: Number(chainId) as SupportedChainId,
-          address: d.address,
-          amount: Number(d.amount),
-        });
+    try {
+      const oft = this.oftsRepository.create({
+        name: createOftDto.name,
+        symbol: createOftDto.symbol,
       });
+      const savedOft = await queryRunner.manager.save(oft);
+      const peersToSave: Oft_Peers[] = [];
+
+      for (const [chainId, distribution] of Object.entries(
+        createOftDto.distributions,
+      )) {
+        const tree = this.merkleTreeService.create({
+          distribution,
+        });
+
+        const peer = this.peersRepository.create({
+          chainId,
+          tree,
+          oft: savedOft,
+          deployTxHash: null,
+          address: null,
+          distributor: null,
+          distributorDeployTxHash: null,
+        } as unknown as Oft_Peers);
+        peersToSave.push(peer);
+      }
+
+      await queryRunner.manager.save(peersToSave);
+
+      await queryRunner.commitTransaction();
+
+      return savedOft;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
     }
-
-    const trees = this.merkleTreeService.create({
-      distribution: allDistributions,
-    });
-
-    const peersToSave: Oft_Peers[] = [];
-
-    for (const [chainId] of Object.entries(createOftDto.distributions)) {
-      const tree = trees[Number(chainId) as SupportedChainId];
-      const peer = this.peersRepository.create({
-        chainId,
-        tree: tree ? JSON.stringify(tree.dump()) : null,
-        oft: savedOft,
-        deployTxHash: null,
-        address: null,
-        distributor: null,
-        distributorDeployTxHash: null,
-      } as unknown as Oft_Peers);
-      peersToSave.push(peer);
-    }
-
-    await this.peersRepository.save(peersToSave);
-
-    return savedOft;
   }
 
   initialSupply({
