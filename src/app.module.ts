@@ -21,13 +21,12 @@ import { dataSourceOptions } from 'db/config';
       load: [nebulaConfig, appConfig, alchemyConfig, rpcConfig, wallets],
       isGlobal: true,
       validationSchema, // comment to prevent env validation
-      envFilePath: ['.env.development.local'],
+      envFilePath: ['.env'],
     }),
     BullModule.forRoot({
       connection: {
-        host: process.env.QUEUE_HOST || 'redis',
-        port:
-          (process.env.QUEUE_PORT && parseInt(process.env.QUEUE_PORT)) || 6379,
+        host: process.env.QUEUE_HOST,
+        port: parseInt(process.env.QUEUE_PORT as string),
       },
     }),
     NebulaModule,
@@ -35,7 +34,10 @@ import { dataSourceOptions } from 'db/config';
     OftModule,
     MerkleTreeModule,
     SharedModule,
-    TypeOrmModule.forRoot(dataSourceOptions),
+    TypeOrmModule.forRoot({
+      ...dataSourceOptions,
+      autoLoadEntities: true,
+    }),
   ],
 })
 export class AppModule {}
