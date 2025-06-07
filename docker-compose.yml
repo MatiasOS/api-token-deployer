@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   db:
     image: postgres
@@ -8,7 +6,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     container_name: postgres
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - db:/data/postgres
     ports:
       - '5432:5432'
 
@@ -30,3 +28,13 @@ services:
     ports:
       - 6379:6379
     restart: unless-stopped
+    volumes:
+      - redis:/data
+  redisinsight:
+    image: redis/redisinsight:2.70
+    container_name: redisinsight
+    ports:
+      - 5540:5540
+volumes:
+  db:
+  redis:
