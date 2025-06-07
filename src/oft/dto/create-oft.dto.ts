@@ -1,7 +1,7 @@
 import { SupportedChainId } from 'src/shared/types/chainId.types';
 
 export class CreateOftDto {
-  chainId: SupportedChainId;
+  chainIds: SupportedChainId[];
   name: string;
   symbol: string;
   distributions: Record<

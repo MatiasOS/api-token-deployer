@@ -7,7 +7,7 @@ import { SupportedChainId } from 'src/shared/types/chainId.types';
 export class OftController {
   constructor(private readonly oftService: OftService) {}
 
-  @Post('/deploy')
+  @Post('/')
   create(@Body() createOftDto: CreateOftDto) {
     return this.oftService.create(createOftDto);
   }
