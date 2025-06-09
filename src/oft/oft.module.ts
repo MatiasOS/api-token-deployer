@@ -6,7 +6,10 @@ import { SharedModule } from 'src/shared/shared.module';
 import { BullModule } from '@nestjs/bullmq';
 import { MerkleTreeService } from 'src/merkle-tree/merkle-tree.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Oft_Peers, Ofts } from './oft.entity';
+import { Oft } from './entities/oft.entity';
+import { OftPeer } from './entities/oftPeers.entity';
+import { DeployQueueService } from './queue/deploy.queue';
+import { ConfigQueueService } from './queue/config.queue';
 
 @Module({
   controllers: [OftController],
@@ -20,9 +23,15 @@ import { Oft_Peers, Ofts } from './oft.entity';
         name: 'configQueue',
       },
     ),
-    TypeOrmModule.forFeature([Ofts, Oft_Peers]),
+    TypeOrmModule.forFeature([Oft, OftPeer]),
   ],
-  providers: [OftService, ConfigService, MerkleTreeService],
-  exports: [OftService],
+  providers: [
+    OftService,
+    ConfigService,
+    MerkleTreeService,
+    DeployQueueService,
+    ConfigQueueService,
+  ],
+  exports: [OftService, TypeOrmModule],
 })
 export class OftModule {}
