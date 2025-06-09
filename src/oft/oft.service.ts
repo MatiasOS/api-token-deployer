@@ -59,12 +59,14 @@ export class OftService {
 
       await queryRunner.commitTransaction();
 
-      for (const { chainId, oft } of peersToSave) {
-        await this.deployQueueService.addDeploy({
-          chainId,
-          oftId: oft.id,
-        });
-      }
+      await Promise.all(
+        peersToSave.map(({ chainId, oft }) =>
+          this.deployQueueService.addDeploy({
+            chainId,
+            oftId: oft.id,
+          }),
+        ),
+      );
 
       return savedOft;
     } catch (error) {
