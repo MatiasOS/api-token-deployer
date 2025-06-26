@@ -6,7 +6,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     container_name: postgres
     volumes:
-      - db:/data/postgres
+      - db:/var/lib/postgresql/data
     ports:
       - '5432:5432'
 
