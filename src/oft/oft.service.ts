@@ -58,12 +58,19 @@ export class OftService {
       await queryRunner.manager.save(peersToSave);
 
       await queryRunner.commitTransaction();
-
       await Promise.all(
-        peersToSave.map(({ chainId, oft }) =>
+        peersToSave.map(({ chainId, oft, id }) =>
           this.deployQueueService.addDeploy({
             chainId,
             oftId: oft.id,
+            oftPeerId: id as number,
+            contractName: 'AlTokeOFT',
+            name: createOftDto.name,
+            symbol: createOftDto.symbol,
+            endpointV2Address: this.endpointV2Address(chainId),
+            initialSupply: this.initialSupply({
+              distributions: createOftDto.distributions[chainId],
+            }).toString(),
           }),
         ),
       );
@@ -83,6 +90,9 @@ export class OftService {
       amount: string;
     }[];
   }): bigint {
+    if (!distributions || distributions.length === 0) {
+      return 0n;
+    }
     const totalSupply: bigint = distributions.reduce(
       (acc, distribution) => acc + BigInt(distribution.amount),
       0n,
